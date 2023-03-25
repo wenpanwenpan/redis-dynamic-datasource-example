@@ -1,0 +1,59 @@
+server:
+  port: 20002
+spring:
+  application:
+    name: enhance-data-redis-demo
+  redis:
+    # 默认数据源
+    host: ${SPRING_REDIS_HOST:wenpan-host}
+    port: ${SPRING_REDIS_PORT:6380}
+    password: ${SPRING_REDIS_PASSWORD:WenPan@123}
+    database: ${SPRING_REDIS_DATABASE:8}
+    # 集群环境打开下面注释，单机不需要打开(单机只需要用上面的配置即可)
+    #cluster:
+    #nodes: xxx.xxx.xxx.xxx:xxxx,xxx.xxx.xxx.xxx:xxxx,xxx.xxx.xxx.xxx:xxxx
+    # 默认值是5 一般当此值设置过大时，容易报：Too many Cluster redirections
+    #maxRedirects: 3
+    client-type: lettuce
+    # 下面 lettuce 和 jedis 配置二选一即可，取决于你使用的是哪种client
+    lettuce:
+      pool:
+        # 资源池中最大连接数
+        # 默认8，-1表示无限制；可根据服务并发redis情况及服务端的支持上限调整
+        max-active: ${SPRING_REDIS_POOL_MAX_ACTIVE:16}
+        # 资源池运行最大空闲的连接数
+        # 默认8，-1表示无限制；可根据服务并发redis情况及服务端的支持上限调整，一般建议和max-active保持一致，避免资源伸缩带来的开销
+        max-idle: ${SPRING_REDIS_POOL_MAX_IDLE:16}
+        # 当资源池连接用尽后，调用者的最大等待时间(单位为毫秒)
+        # 默认 -1 表示永不超时，设置5秒
+        max-wait: ${SPRING_REDIS_POOL_MAX_WAIT:5000}
+    jedis:
+      pool:
+        # 资源池中最大连接数
+        # 默认8，-1表示无限制；可根据服务并发redis情况及服务端的支持上限调整
+        max-active: ${SPRING_REDIS_POOL_MAX_ACTIVE:16}
+        # 资源池运行最大空闲的连接数
+        # 默认8，-1表示无限制；可根据服务并发redis情况及服务端的支持上限调整，一般建议和max-active保持一致，避免资源伸缩带来的开销
+        max-idle: ${SPRING_REDIS_POOL_MAX_IDLE:16}
+        # 当资源池连接用尽后，调用者的最大等待时间(单位为毫秒)
+        # 默认 -1 表示永不超时，设置5秒
+        max-wait: ${SPRING_REDIS_POOL_MAX_WAIT:5000}
+    # 这里使用一台Redis的多个db来模拟多数据源
+    datasource:
+      # 第一个数据源
+      source1:
+        host: ${SPRING_REDIS_HOST:wenpan-host}
+        port: ${SPRING_REDIS_PORT:6379}
+        password: ${SPRING_REDIS_PASSWORD:WenPan@123}
+        database: ${SPRING_REDIS_DATABASE:1}
+      # 第二个数据源
+      source2:
+        host: ${SPRING_REDIS_HOST:wenpan-host}
+        port: ${SPRING_REDIS_PORT:6379}
+        password: ${SPRING_REDIS_PASSWORD:WenPan@123}
+        database: ${SPRING_REDIS_DATABASE:2}
+dynamic:
+  redis:
+    # 是否开启redis动态db切换
+    dynamic-database: true
+
