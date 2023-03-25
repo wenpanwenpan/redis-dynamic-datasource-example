@@ -15,10 +15,11 @@
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
+        <!--依赖动态Redis-->
         <dependency>
-            <groupId>org.enhance.redis</groupId>
+            <groupId>io.github.dynamic.redis</groupId>
             <artifactId>redis-dynamic-datasource</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
