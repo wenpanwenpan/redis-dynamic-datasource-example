@@ -1,6 +1,6 @@
 package org.dynamic.redis.example;
 
-import org.enhance.redis.EnableRedisMultiDataSource;
+import org.enhance.redis.annotation.EnableRedisMultiDataSource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

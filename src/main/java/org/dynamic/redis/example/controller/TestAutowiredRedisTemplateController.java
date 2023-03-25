@@ -1,6 +1,7 @@
 package org.dynamic.redis.example.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.enhance.redis.annotation.RedisDataSource;
 import org.enhance.redis.helper.ApplicationContextHelper;
 import org.enhance.redis.helper.EasyRedisHelper;
 import org.enhance.redis.helper.RedisHelper;
@@ -15,60 +16,78 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 /**
- * 测试
+ * <p>
+ * <li>
+ * 通过 {@link @Autowired}或{@link @Resource} 注解直接注入多数据源对应的 RedisTemplate 和  RedisHelper，使用案例，
+ * 以满足某些使用者不习惯使用 {@link org.enhance.redis.client.RedisMultiSourceClient} 来操作多数据源和切换Redis db.
+ * 所以提供了直接注入某个数据源对应的 {@link RedisTemplate} 和 {@link RedisHelper} 的使用案例，
+ * 直接按名称通过{@link @Autowired}或{@link @Resource} 注入对应数据源的RedisTemplate或RedisHelper即可操作对应的数据源(包括动态切换redis db)
+ * </li>
+ * <li>
+ * 并且提供了 {@link EasyRedisHelper} 来简化手动切换Redis db
+ * </li>
+ * </p>
  *
  * @author Mr_wenpan@163.com 2021/08/07 18:40
  */
 @Slf4j
-@RestController("TestEnhanceDataRedisController.v1")
-@RequestMapping("/v1/test-dynamic-redis")
-public class TestEnhanceDataRedisController {
+@RestController("TestAutowiredRedisTemplateController.v1")
+@RequestMapping("/v1/test-autowired-template")
+public class TestAutowiredRedisTemplateController {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
     /**
-     * 注入默认数据源
+     * 注入默认数据源，可通过该 redisTemplate 对默认数据源进行操作
      */
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
     /**
-     * 默认数据源对应的redisHelper
+     * 默认数据源对应的 redisHelper，可通过该 redisHelper 对默认数据源进行操作(包括动态切换redis db)
      */
     @Autowired
     @Qualifier("redisHelper")
     private RedisHelper redisHelper;
 
     /**
-     * source1数据源对应的redisHelper
+     * source1数据源对应的redisHelper，可通过该 redisHelper 对source1数据源进行操作(包括动态切换redis db)
      */
     @Autowired(required = false)
-    @Qualifier("source1RedisHelper")
+    @RedisDataSource("source1RedisHelper")
     private RedisHelper source1RedisHelper;
 
     /**
-     * source2数据源对应的redisHelper
+     * source2数据源对应的redisHelper，可通过该 redisHelper 对source2数据源进行操作(包括动态切换redis db)
      */
     @Autowired(required = false)
     @Qualifier("source2RedisHelper")
     private RedisHelper source2RedisHelper;
 
     /**
-     * 注入第一个数据源
+     * 注入第一个数据源，可通过该 RedisTemplate 对source1数据源进行操作
      */
     @Autowired(required = false)
     @Qualifier("source1RedisTemplate")
     private RedisTemplate<String, String> source1RedisTemplate;
 
     /**
-     * 注入第二个数据源
+     * 注入第二个数据源，可通过该 RedisTemplate 对source2数据源进行操作
      */
     @Autowired(required = false)
     @Qualifier("source1RedisTemplate")
     private RedisTemplate<String, String> source2RedisTemplate;
 
-    @GetMapping
+    //
+    // 使用 redisHelper 操作默认数据源(包括动态切换redis db)
+    // ------------------------------------------------------------------------------------------------
+
+    /**
+     * 测试通过直接注入默认数据源对应的 redisHelper 来操作默认数据源
+     * 请求url: http://localhost:20002/v1/test-autowired-template/test-1
+     */
+    @GetMapping("/test-1")
     public void testChangeDb() {
         redisHelper.setCurrentDatabase(2);
         // 默认写到1号库
@@ -80,6 +99,10 @@ public class TestEnhanceDataRedisController {
         redisHelper.clearCurrentDatabase();
     }
 
+    /**
+     * 测试通过直接注入默认数据源对应的 redisHelper 来操作默认数据源，并且配合 EasyRedisHelper 工具类来切换Redis db
+     * 请求url: http://localhost:20002/v1/test-autowired-template/test-2
+     */
     @GetMapping("/test-2")
     public void testChangeDb2() {
         EasyRedisHelper.execute(2, () -> {
@@ -88,6 +111,10 @@ public class TestEnhanceDataRedisController {
         });
     }
 
+    /**
+     * 测试通过直接注入默认数据源对应的 redisHelper 来操作默认数据源，并且配合 EasyRedisHelper 工具类来切换Redis db
+     * 请求url: http://localhost:20002/v1/test-autowired-template/test-3
+     */
     @GetMapping("/test-3")
     public void testChangeDb3() {
         EasyRedisHelper.execute(2, redisHelper, (helper) -> {
@@ -96,6 +123,10 @@ public class TestEnhanceDataRedisController {
         });
     }
 
+    /**
+     * 测试通过直接注入默认数据源对应的 redisHelper 来操作默认数据源，并且配合 EasyRedisHelper 工具类来切换Redis db
+     * 请求url: http://localhost:20002/v1/test-autowired-template/test-4
+     */
     @GetMapping("/test-4")
     public void testChangeDb4() {
         String result = EasyRedisHelper.executeWithResult(2, () -> {
@@ -104,6 +135,10 @@ public class TestEnhanceDataRedisController {
         });
     }
 
+    /**
+     * 测试通过直接注入默认数据源对应的 redisHelper 来操作默认数据源，并且配合 EasyRedisHelper 工具类来切换Redis db
+     * 请求url: http://localhost:20002/v1/test-autowired-template/test-5
+     */
     @GetMapping("/test-5")
     public void testChangeDb5() {
         // 指定操作库，不带返回值的操作，使用redisHelper封装的api
@@ -112,6 +147,10 @@ public class TestEnhanceDataRedisController {
         String result = EasyRedisHelper.executeWithResult(2, () -> redisHelper.strGet("dynamic-key-test-2"));
     }
 
+    /**
+     * 测试通过直接注入默认数据源对应的 redisHelper 来操作默认数据源，并且配合 EasyRedisHelper 工具类来切换Redis db
+     * 请求url: http://localhost:20002/v1/test-autowired-template/test-6
+     */
     @GetMapping("/test-6")
     public void testChangeDb6() {
         // 指定操作库，不带返回值的操作，使用redisTemplate原生api
@@ -120,6 +159,10 @@ public class TestEnhanceDataRedisController {
         String result = EasyRedisHelper.executeWithResult(1, (redisTemplate) -> redisTemplate.opsForList().leftPop("queue"));
     }
 
+    /**
+     * 测试通过直接注入数据源对应的 redisTemplate 来操作数据源
+     * 请求url: http://localhost:20002/v1/test-autowired-template/test-7
+     */
     @GetMapping("/test-7")
     public void testMultiDatasource() {
         // 使用指定的数据源的redisTemplate
@@ -135,6 +178,10 @@ public class TestEnhanceDataRedisController {
         System.out.println("beansOfType = " + beansOfType);
     }
 
+    /**
+     * 测试通过直接注入数据源对应的 redisTemplate 和 redisHelper 来操作数据源
+     * 请求url: http://localhost:20002/v1/test-autowired-template/test-8
+     */
     @GetMapping("/test-8")
     public void testMultiDatasourceRedisHelper() {
 
@@ -158,13 +205,21 @@ public class TestEnhanceDataRedisController {
         System.out.println("beansOfType = " + beansOfType);
     }
 
-    @GetMapping("/test-default-template")
+    /**
+     * 测试通过直接注入默认数据源对应的 redisTemplate 来操作数据源
+     * 请求url: http://localhost:20002/v1/test-autowired-template/test-9
+     */
+    @GetMapping("/test-9")
     public void testDefaultRedisTemplate() {
         // 使用默认数据源的redisTemplate操作默认数据源
         redisTemplate.opsForValue().set("key", "value");
     }
 
-    @GetMapping("/test-default-redisHelper")
+    /**
+     * 测试通过直接注入默认数据源对应的 redisHelper 来操作数据源（并手动切换Redis db）
+     * 请求url: http://localhost:20002/v1/test-autowired-template/test-10
+     */
+    @GetMapping("/test-10")
     public void testDefaultRedisHelper() {
         // 使用默认数据源的redisHelper操作默认数据源
         redisHelper.lstRightPop("key");
